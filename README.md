@@ -66,6 +66,34 @@ strings librpc.lib | findstr /B OpenSSL
 scons platform=<platform>
 ```
 
+
+## File Structure
+After building according to the above instructions, your project should look like the following:
+
+```
+<godot-project-directory>/
+├─ addons/
+│  ├─ godot-perforce-plugin/
+│  │  ├─ win64/
+│  │  │  ├─ Exported P4 Plugin DLLs...
+│  │  │  ├─ ssleay32.dll
+│  │  │  ├─ libeay32.lib
+
+src/
+├─ thirdparty/
+│  ├─ p4/
+│  │  ├─ lib/
+│  │  │  ├─ P4 Libs...
+│  │  ├─ include/
+│  │  │  ├─ P4 Headers...
+│  ├─ openssl/
+│  │  ├─ ssleay32.lib
+│  │  ├─ libeay32.lib
+
+godot-cpp/
+├─ godot-cpp stuff...
+```
+
 ### Additional Reference
 [Compiling And Linking Helix Core Applications](https://www.perforce.com/manuals/p4api/Content/P4API/client.programming.compiling.html#Compiling_and_linking_Helix_Server_applications)
 
