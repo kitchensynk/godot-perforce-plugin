@@ -77,7 +77,7 @@ After building according to the above instructions, your project should look lik
 │  │  ├─ win64/
 │  │  │  ├─ Exported P4 Plugin DLLs...
 │  │  │  ├─ ssleay32.dll
-│  │  │  ├─ libeay32.lib
+│  │  │  ├─ libeay32.dll
 
 src/
 ├─ thirdparty/
