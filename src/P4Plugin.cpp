@@ -45,7 +45,7 @@ bool godot::P4Plugin::_initialize(const godot::String &project_path) {
     StrBuf msg;
    
 
-    const char* url = "localhost:1666";
+    const char* url = "####:1666";
     const char* user = "####";
     const char* ws = "####";
     const char* pw = "####";

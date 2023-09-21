@@ -27,10 +27,10 @@ libs3 = "crypt32.lib"
 
 libs4 = "src/thirdparty/openssl/ssleay32.lib"
 libs5 = "src/thirdparty/openssl/libeay32.lib"
-libs6 = "src/thirdparty/p4/libclient.lib"        
-libs7 = "src/thirdparty/p4/librpc.lib"      
-libs8 = "src/thirdparty/p4/libsupp.lib"         
-libs9 = "src/thirdparty/p4/libp4api.lib"
+libs6 = "src/thirdparty/p4/lib/libclient.lib"        
+libs7 = "src/thirdparty/p4/lib/librpc.lib"      
+libs8 = "src/thirdparty/p4/lib/libsupp.lib"         
+libs9 = "src/thirdparty/p4/lib/libp4api.lib"
 
 libs10 = "kernel32.lib"
 libs11 = "user32.lib"
@@ -54,7 +54,7 @@ if env["platform"] == "macos":
     )
 else:
     library = env.SharedLibrary(
-        "demo/addons/win64/p4_plugin{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        "demo/addons/godot-perforce-plugin/win64/p4_plugin{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
         source=sources
     )
 

@@ -5,8 +5,8 @@
 
 src/thirdparty/
 
-# Godot ignores
-demo/
+#Godot ignore
+demo/.godot/
 
 # Godot Serialisations
 extension_api.json
