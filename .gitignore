@@ -3,6 +3,8 @@
 
 *.bat
 
+src/thirdparty/
+
 # Godot ignores
 demo/
 
@@ -31,4 +33,3 @@ win64/
 *.obj
 *.ilk
 *.pdb
-!thirdparty/openssl/*
