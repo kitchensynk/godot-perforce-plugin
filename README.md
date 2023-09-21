@@ -69,7 +69,10 @@ scons platform=<platform>
 ### Additional Reference
 [Compiling And Linking Helix Core Applications](https://www.perforce.com/manuals/p4api/Content/P4API/client.programming.compiling.html#Compiling_and_linking_Helix_Server_applications)
 
+## License
+This plugin is under the MIT License. Third-party notices are present in THIRDPARTY.md.
 
+OpenSSL License Attributions - This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit. (http://www.openssl.org/). This product includes cryptographic software written by Eric Young (eay@cryptsoft.com)
 
 
 
