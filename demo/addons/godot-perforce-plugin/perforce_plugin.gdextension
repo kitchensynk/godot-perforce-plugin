@@ -1,0 +1,8 @@
+[configuration]
+
+entry_symbol = "p4_plugin_init"
+compatibility_minimum = "4.1"
+
+[libraries]
+
+windows.debug.x86_64 = "win64/p4_plugin.windows.template_debug.x86_64.dll"

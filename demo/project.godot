@@ -1,0 +1,20 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Demo"
+config/features=PackedStringArray("4.1", "Forward Plus")
+config/icon="res://icon.svg"
+
+[editor]
+
+version_control/plugin_name="P4Plugin"
+version_control/autoload_on_startup=true

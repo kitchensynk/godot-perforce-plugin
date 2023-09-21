@@ -45,10 +45,10 @@ bool godot::P4Plugin::_initialize(const godot::String &project_path) {
     StrBuf msg;
    
 
-    const char* url = "192.168.4.44:1666";
-    const char* user = "Jared";
-    const char* ws = "Legacy";
-    const char* pw = "Cowsaysmoo";
+    const char* url = "####:1666";
+    const char* user = "####";
+    const char* ws = "####";
+    const char* pw = "####";
 
     P4Libraries::Initialize(P4LIBRARIES_INIT_ALL, &e);
 
