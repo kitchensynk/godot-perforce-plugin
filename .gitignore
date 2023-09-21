@@ -1,0 +1,34 @@
+# SConstruct db
+*.dblite
+
+*.bat
+
+# Godot ignores
+demo/
+
+# Godot Serialisations
+extension_api.json
+!/ci/extension_api.json
+
+# Visual Studio Cache
+.vs/
+
+# VSCode Cache
+.vscode/
+
+# Mac stuff
+.DS_Store
+
+# Binaries
+build/
+bin/
+macos/
+linux/
+win64/
+*.lib
+*.a
+*.so
+*.obj
+*.ilk
+*.pdb
+!thirdparty/openssl/*
