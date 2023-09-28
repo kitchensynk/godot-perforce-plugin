@@ -3,8 +3,17 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 
-       
+
+//Client User Class Functions
 void P4ClientUser::OutputInfo( char level, const char * data )
+{
+    godot::UtilityFunctions::print(data);
+}
+void P4ClientUser::OutputError( const char * data )
+{
+    godot::UtilityFunctions::push_error(data);
+}
+void P4ClientUser::OutputText( const char * data, int length )
 {
     godot::UtilityFunctions::print(data);
 }
@@ -53,13 +62,20 @@ void godot::P4Plugin::_set_credentials(const godot::String &username, const godo
 	creds.ssh_private_key_path = ssh_private_key_path;
 	creds.ssh_passphrase = ssh_passphrase;
 
-    client.Clear();
-    client.Reset();
-    //client.~ClientApi();
-    P4Libraries::Shutdown(P4LIBRARIES_INIT_ALL, &e);
+    //Clean up before re-connect
+    //client.Clear();
+    //client.Reset();
+    //P4Libraries::Shutdown(P4LIBRARIES_INIT_ALL, &e);
 
     //Testing
     P4Libraries::Initialize(P4LIBRARIES_INIT_ALL, &e);
+    if (e.Test())
+    {
+        e.Fmt(&msg);
+        popup_error("P4 Error:\n" + godot::String(msg.Text()));
+        e.Clear();
+    }
+
 
     // Connect to server using EditorVCS Window
     // NOTE: use SSH Public/Private paths for Server Address/WS name 
@@ -70,10 +86,11 @@ void godot::P4Plugin::_set_credentials(const godot::String &username, const godo
     
     UtilityFunctions::print("\nCurrent VCS Credentials:");
     UtilityFunctions::print("User: " + creds.username + "\n" +
+                            "Password: " + creds.password + "\n" +
                             "Server Address: " + creds.ssh_public_key_path + "\n" +
                             "Workspace: " + creds.ssh_private_key_path);
 
-    UtilityFunctions::print("\n Attempting to Establish Connection to P4 Server: " + creds.ssh_public_key_path + "...");
+    UtilityFunctions::print("\nAttempting to Establish Connection to P4 Server: " + creds.ssh_public_key_path + "...");
     
     //Init Connection
     client.Init(&e);
@@ -93,10 +110,8 @@ void godot::P4Plugin::_set_credentials(const godot::String &username, const godo
 	}
 
     //Debug Testing:
-    client.Run("info", &ui);
-	
-	char data;	
-	ui.OutputInfo('0', &data);
+    //client.Run("info", &ui);
+    
 
     //Cleanup
     client.Final(&e);

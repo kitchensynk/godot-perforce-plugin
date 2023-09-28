@@ -17,7 +17,10 @@ class P4ClientUser : public ClientUser
 {
     public:
         virtual void OutputInfo( char level, const char * data ) override;
-       
+		virtual void OutputText( const char * data, int length) override;
+		virtual void OutputError( const char * data ) override;
+
+		
 };
 
 
