@@ -113,6 +113,17 @@ void godot::P4Plugin::_set_credentials(const godot::String &username, const godo
     //client.Run("info", &ui);
     
 
+    //godot::UtilityFunctions::print("\np4 files :");
+    //char* bs[] = {"//depot/..."};
+    //client.SetArgv(1, bs);
+    //client.Run("files", &ui);
+
+	char data;	
+	ui.OutputInfo('0', &data);
+    ui.OutputError(&data);
+    ui.OutputText(&data, 100);    
+
+
     //Cleanup
     client.Final(&e);
     e.Clear();
