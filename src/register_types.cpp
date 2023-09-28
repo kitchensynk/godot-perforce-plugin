@@ -10,7 +10,7 @@
 using namespace godot;
 
 void initialize_p4_plugin_module(ModuleInitializationLevel p_level) {
-    if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
+    if (p_level != MODULE_INITIALIZATION_LEVEL_EDITOR) {
         return;
     }
 
@@ -18,7 +18,7 @@ void initialize_p4_plugin_module(ModuleInitializationLevel p_level) {
 }
 
 void uninitialize_p4_plugin_module(ModuleInitializationLevel p_level) {
-    if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
+    if (p_level != MODULE_INITIALIZATION_LEVEL_EDITOR) {
         return;
     }
 }
@@ -30,7 +30,7 @@ GDExtensionBool GDE_EXPORT p4_plugin_init(GDExtensionInterfaceGetProcAddress p_g
 
     init_obj.register_initializer(initialize_p4_plugin_module);
     init_obj.register_terminator(uninitialize_p4_plugin_module);
-    init_obj.set_minimum_library_initialization_level(MODULE_INITIALIZATION_LEVEL_SCENE);
+    init_obj.set_minimum_library_initialization_level(MODULE_INITIALIZATION_LEVEL_EDITOR);
 
     return init_obj.init();
 }
