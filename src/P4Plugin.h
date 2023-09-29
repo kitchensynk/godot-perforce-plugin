@@ -16,11 +16,12 @@ struct Credentials {
 class P4ClientUser : public ClientUser
 {
     public:
+		Credentials creds;
+
         virtual void OutputInfo( char level, const char * data ) override;
 		virtual void OutputText( const char * data, int length) override;
 		virtual void OutputError( const char * data ) override;
-
-		
+		virtual void Prompt(const StrPtr &msg, StrBuf &buf, int noEcho, Error *e) override;	
 };
 
 
@@ -52,7 +53,7 @@ namespace godot
 			void _set_credentials(const godot::String &username, const godot::String &password, const godot::String &ssh_public_key_path, const godot::String &ssh_private_key_path, const godot::String &ssh_passphrase) override;
 			godot::String _get_vcs_name() override;
 
-			
+			void _test();			
 	};
 
 }
