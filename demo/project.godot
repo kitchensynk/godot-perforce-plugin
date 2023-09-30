@@ -22,3 +22,7 @@ project/assembly_name="Demo"
 
 version_control/plugin_name="P4Plugin"
 version_control/autoload_on_startup=true
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot-perforce-plugin/plugin.cfg")

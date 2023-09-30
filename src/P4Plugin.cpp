@@ -8,26 +8,60 @@
 //Client User Class Functions
 void P4ClientUser::OutputInfo( char level, const char * data )
 {
-    godot::UtilityFunctions::print(data);
+    if(IsValidASCII(data))
+        godot::UtilityFunctions::print(data);
 }
 void P4ClientUser::OutputError( const char * data )
 {
-    godot::UtilityFunctions::push_error(data);
+    if(IsValidASCII(data))
+        godot::UtilityFunctions::push_error(data);
 }
+
 void P4ClientUser::OutputText( const char * data, int length )
 {
-    godot::UtilityFunctions::print(data);
+    if(IsValidASCII(data))
+        godot::UtilityFunctions::print(data);
 }
+
+/// @brief This method is automatically called by P4API when a Run() requires user input. Currently just used for Run("login")
+/// @param msg 
+/// @param buf 
+/// @param noEcho 
+/// @param e 
 void P4ClientUser::Prompt( const StrPtr &msg, StrBuf &buf, int noEcho, Error *e )
-{
-    if(strcmp(msg.Text(),"Enter password:")){
+{ 
+    if(strcmp(msg.Text(),"Enter password:"))
+    {
         buf.Set(creds.password.utf8());
-    }else{
+    }
+    else
+    {
         godot::UtilityFunctions::push_error(msg.Text());
         godot::UtilityFunctions::push_error("^ PROMPT NOT IMPLEMENTED ^"); 
     }
+}
 
+bool P4ClientUser::IsValidASCII(const char * data)
+{
+    std::string s = static_cast<std::string>(data);
     
+    if(s.length() == 0)
+        return false;
+
+    for (auto c: s) 
+    {
+        if (static_cast<unsigned char>(c) > 127) 
+            return false;
+    }
+
+    return true;
+}
+
+//File System Class
+P4FileHandler::P4FileHandler()
+{
+    //WIP
+    //godot::EditorInterface (* const interface_func)() { &get_editor_interface };
 }
 
 //Member Variables
@@ -66,9 +100,8 @@ bool godot::P4Plugin::_shut_down()
 //Override Methods
 void godot::P4Plugin::_bind_methods() { }
 
-void godot::P4Plugin::_test(){
-
-
+void godot::P4Plugin::_test()
+{
         //Debug Testing:
 
         //client.Run("info", &ui);
@@ -83,11 +116,29 @@ void godot::P4Plugin::_test(){
         //client.SetArgv(1, bs);
         //client.Run("files", &ui);
 
-        char data;
-        ui.OutputInfo('0', &data);
-        ui.OutputError(&data);
-        ui.OutputText(&data, 1000);    
+        //char data;
+        //ui.OutputInfo('0', &data);
+        //ui.OutputError(&data);
+        //ui.OutputText(&data, 1000);  
+        
+        //char* bs[] = {"//depot/..."};
+        //RunP4Command("files", bs);
 
+        char* args[] = {"-sa"};
+        RunP4Command("diff", args);  
+}
+
+bool godot::P4Plugin::RunP4Command(const char* cmd, char* const* args)
+{
+    client.SetArgv(sizeof(args), args);  
+    client.Run(cmd, &ui);
+
+    char data;
+    ui.OutputInfo('0', &data);
+    ui.OutputError(&data);
+    ui.OutputText(&data, 1000);  
+
+    return true;
 }
 
 void godot::P4Plugin::_set_credentials(const godot::String &username, const godot::String &password, const godot::String &ssh_public_key_path, const godot::String &ssh_private_key_path, const godot::String &ssh_passphrase)
@@ -100,12 +151,7 @@ void godot::P4Plugin::_set_credentials(const godot::String &username, const godo
 
     ui.creds = creds;
 
-    //Clean up before re-connect
-    //client.Clear();
-    //client.Reset();
-    //P4Libraries::Shutdown(P4LIBRARIES_INIT_ALL, &e);
-
-    //Testing
+    //Initalize P4
     P4Libraries::Initialize(P4LIBRARIES_INIT_ALL, &e);
     if (e.Test())
     {
@@ -146,16 +192,8 @@ void godot::P4Plugin::_set_credentials(const godot::String &username, const godo
         UtilityFunctions::print("-------------------------\n");
     }
 
+    //Use set password and user to login to p4 server
     client.Run("login", &ui);
-
-    if (e.Test())
-    {
-        e.Fmt(&msg);
-        popup_error("Connection Error:\n" + godot::String(msg.Text()));
-        e.Clear();
-    }else{
-        UtilityFunctions::print("\n------------~~~~~---------\n");
-    }
 
     _test();
 
@@ -171,5 +209,8 @@ godot::String godot::P4Plugin::_get_vcs_name()
 	return "P4";
 }
 
+godot::TypedArray<godot::Dictionary> godot::P4Plugin::_get_modified_files_data()
+{
 
-
+    return godot::TypedArray<godot::Dictionary>();
+}
