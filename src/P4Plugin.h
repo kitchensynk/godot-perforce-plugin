@@ -5,9 +5,12 @@
 #include "thirdparty/p4/include/clientapi.h"
 #include "thirdparty/p4/include/p4libs.h"
 
-#include "godot-cpp/gen/include/godot_cpp/classes/editor_plugin.hpp"
-#include "godot-cpp/gen/include/godot_cpp/classes/editor_interface.hpp"
-#include "godot-cpp/gen/include/godot_cpp/classes/editor_file_system.hpp"
+#include "godot_cpp/classes/editor_plugin.hpp"
+#include "godot_cpp/classes/editor_interface.hpp"
+#include "godot_cpp/classes/editor_file_system.hpp"
+
+
+
 
 struct Credentials {
 	godot::String username;
@@ -29,20 +32,18 @@ class P4ClientUser : public ClientUser
 		bool IsValidASCII(const char * data);
 };
 
-class P4FileHandler : godot::EditorPlugin
-{
-	GDCLASS(P4FileHandler, godot::EditorPlugin);
 
-	public:
-		godot::EditorInterface interface;
-		godot::EditorFileSystem fileSystem;
-		
-		P4FileHandler();
-		~P4FileHandler();
-};
 
 namespace godot 
 {
+	
+	class P4FileHandler : public EditorPlugin
+	{
+		public:
+			godot::Callable callable;
+			void Init();
+	};
+
 	class P4Plugin : public EditorVCSInterface 
 	{
 		GDCLASS(P4Plugin, EditorVCSInterface)
@@ -73,8 +74,11 @@ namespace godot
 			// Testing
 			void _test();	
 			bool RunP4Command(const char * cmd, char* const* args);
+
+			void P4FileChange();
 	};
 
 }
+
 
 #endif

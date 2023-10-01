@@ -20,5 +20,4 @@ func _exit_tree():
 	pass
 
 func _filesystem_changed():
-	print("FS Changed")
 	pass
