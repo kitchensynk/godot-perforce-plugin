@@ -1,7 +1,22 @@
 <img src="/docs/godot-p4.png" width="25%" />
 
 # Godot Perforce Plugin
-Adds support for Helix Core P4 in Godot 4.1
+Adds support for Helix Core P4 in Godot 4.1.1
+
+# Features
+
+- Extends EditorVCSInterface
+- Connects to Perforce Server
+- Updates Changelist when Godot Filesystem changes
+- Implements Godot Push/Pull/Fetch as P4 Submit/Sync
+
+## Planned Features
+
+- Populate EditorVCSInterface Staged Changes Window with modified files
+- Icons for P4 File Status
+- Modify Godot to support EditorVCSInterface modifications per plugin (ie Login Window)
+- Support for Diff / Inline Diff
+- Support for P4 Streams
 
 ## Installation Instructions
 
