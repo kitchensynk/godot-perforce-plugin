@@ -17,6 +17,7 @@ Adds support for Helix Core P4 in Godot 4.1.1
 - Modify Godot to support EditorVCSInterface modifications per plugin (ie Login Window)
 - Support for Diff / Inline Diff
 - Support for P4 Streams
+- Support for Checkout through UI
 
 ## Installation Instructions
 
