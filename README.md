@@ -122,7 +122,7 @@ https://github.com/github/gitignore/blob/4488915eec0b3a45b5c63ead28f286819c0917d
 ### Logging in
 Godot's VCS Interface is built for Git so for the time being you can connect as so:
 
-<img src="/docs/login.png" width="25%" />
+<img src="/docs/login.png" width="64%" />
 
 ### Additional Reference
 [Compiling And Linking Helix Core Applications](https://www.perforce.com/manuals/p4api/Content/P4API/client.programming.compiling.html#Compiling_and_linking_Helix_Server_applications)
