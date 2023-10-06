@@ -8,7 +8,9 @@
 #include "godot_cpp/classes/editor_plugin.hpp"
 #include "godot_cpp/classes/editor_interface.hpp"
 #include "godot_cpp/classes/editor_file_system.hpp"
-
+#include "godot_cpp/classes/editor_file_system_directory.hpp"
+#include "godot_cpp/classes/dir_access.hpp"
+#include "godot_cpp/classes/project_settings.hpp"
 
 
 
@@ -24,6 +26,8 @@ class P4ClientUser : public ClientUser
 {
     public:
 		Credentials creds;
+		godot::String output;
+		bool debug_mode = false;
 
         virtual void OutputInfo( char level, const char * data ) override;
 		virtual void OutputText( const char * data, int length) override;
@@ -41,29 +45,36 @@ namespace godot
 	{
 		public:
 			godot::Callable callable;
-			void Init();
+			godot::String Init();
+			
 	};
 
 	class P4Plugin : public EditorVCSInterface 
 	{
 		GDCLASS(P4Plugin, EditorVCSInterface)
 
+		private:
+			godot::TypedArray<godot::Dictionary> modified_files;
+
 		protected:
 			static void _bind_methods();
 
 		public:
-
 			//Public VCS Variables
 			Credentials creds;
 			P4ClientUser ui;
 			ClientApi client;
 			StrBuf msg;
+			
+			bool logged_in = false;
 
 			//Constructor/Deconstructor
 			P4Plugin();
 			~P4Plugin();
 
-			//VCS Plugin Methods
+			void _connect();
+
+			#pragma region VCS Plugin Methods
 			bool _initialize(const godot::String &project_path) override;	
 			bool _shut_down() override;
 			
@@ -71,11 +82,22 @@ namespace godot
 			godot::String _get_vcs_name() override;
 			godot::TypedArray<godot::Dictionary> _get_modified_files_data() override;
 
-			// Testing
-			void _test();	
-			bool RunP4Command(const char * cmd, char* const* args);
+			void _pull(const String &remote) override;
+			void _push(const String &remote, bool force) override;
+			void _fetch(const String &remote) override;
+			void _commit(const String &msg) override;
+			const String defaultCommit = "Submitted by Godot <[o_o]>";
+			String commitMessage = "";
+			#pragma endregion
 
-			void P4FileChange();
+			// Testing
+			bool _run_p4_command(const char* cmd, char* const* args);	//Cmd w/ multiple args
+			bool _run_p4_command(const char* cmd, const char* arg);		//Cmd w/ one arg
+			bool _run_p4_command(const char* cmd);						//Cmd w/o args
+
+			void _traverse_file_tree(godot::String path, int depth = 0);
+
+			void _p4_file_change();
 	};
 
 }
