@@ -1,3 +1,5 @@
+.p4ignore
+
 # SConstruct db
 *.dblite
 
