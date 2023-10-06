@@ -1,7 +1,23 @@
-<img src="/godot-p4.png" width="25%" />
+<img src="/docs/godot-p4.png" width="25%" />
 
 # Godot Perforce Plugin
-Adds support for Helix Core P4 in Godot 4.1
+Adds support for Helix Core P4 in Godot 4.1.1
+
+# Features
+
+- Extends EditorVCSInterface
+- Connects to Perforce Server
+- Updates Changelist when Godot Filesystem changes
+- Implements Godot Push/Pull/Fetch as P4 Submit/Sync
+
+## Planned Features
+
+- Populate EditorVCSInterface Staged Changes Window with modified files
+- Icons for P4 File Status
+- Modify Godot to support EditorVCSInterface modifications per plugin (ie Login Window)
+- Support for Diff / Inline Diff
+- Support for P4 Streams
+- Support for Checkout through UI
 
 ## Installation Instructions
 
@@ -93,6 +109,20 @@ src/
 godot-cpp/
 ├─ godot-cpp stuff...
 ```
+### P4IGNORE File
+
+Godot has provided a .gitignore file that works as a template for .p4ignore. The syntax is the same, just save it somewhere as ".p4ignore" (Likely your project directory) and run: 
+
+```P4 set P4IGNORE="PATH TO P4 IGNORE"```
+
+### Godot .gitignore:
+
+https://github.com/github/gitignore/blob/4488915eec0b3a45b5c63ead28f286819c0917de/Godot.gitignore
+
+### Logging in
+Godot's VCS Interface is built for Git so for the time being you can connect as so:
+
+<img src="/docs/login.png" width="64%" />
 
 ### Additional Reference
 [Compiling And Linking Helix Core Applications](https://www.perforce.com/manuals/p4api/Content/P4API/client.programming.compiling.html#Compiling_and_linking_Helix_Server_applications)
