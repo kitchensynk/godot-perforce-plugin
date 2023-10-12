@@ -11,6 +11,7 @@
 //Client User Class Functions
 void P4ClientUser::OutputInfo( char level, const char * data )
 {
+    godot::UtilityFunctions::print("Outputing Info...");
     if(IsValidASCII(data))
     {
         if(debug_mode) 
@@ -18,34 +19,31 @@ void P4ClientUser::OutputInfo( char level, const char * data )
 
         output = data;
     }
-    else
-        output = "";
 }
 
 void P4ClientUser::OutputError( const char * data )
 {
+   godot::UtilityFunctions::print("Outputing Error...");
+
    if(IsValidASCII(data))
     {
         if(debug_mode) 
             godot::UtilityFunctions::push_error(data);
 
-        output = data;
+        outputError = data;
     }
-    else
-        output = "";
 }
 
 void P4ClientUser::OutputText( const char * data, int length )
 {
+    godot::UtilityFunctions::print("Outputting Text...");
     if(IsValidASCII(data))
     {
         if(debug_mode) 
             godot::UtilityFunctions::print(data);
 
-        output = data;
+        outputText = data;
     }
-    else
-        output = "";
 }
 
 /// @brief This method is automatically called by P4API when a Run() requires user input. Currently just used for Run("login")
@@ -227,6 +225,80 @@ godot::TypedArray<godot::Dictionary> godot::P4Plugin::_get_modified_files_data()
     
     //Add changed files to P4 change list
     _run_p4_command("reconcile");
+
+    ChangeType fileStatus;
+    if(ui.output.length() > 0)
+    {
+        /*
+        //A new file has been added.
+        if(ui.output.contains("reconcile to add"))  
+            fileStatus = CHANGE_TYPE_NEW;
+        
+        //An earlier added file has been modified.
+        if(ui.output.contains("DELETE ME"))  
+            fileStatus = CHANGE_TYPE_MODIFIED;
+        
+        //An earlier added file has been renamed.
+        if(ui.output.contains("DELETE ME"))         
+            fileStatus = CHANGE_TYPE_RENAMED;
+
+        //An earlier added file has been deleted.
+        if(ui.output.contains("DELETE ME"))         
+            fileStatus = CHANGE_TYPE_DELETED;
+        
+        //An earlier added file has been typechanged.
+        if(ui.output.contains("DELETE ME"))         
+            fileStatus = CHANGE_TYPE_TYPECHANGE;
+        
+        //A file is left unmerged.
+        if(ui.output.contains("DELETE ME"))         
+            fileStatus = CHANGE_TYPE_UNMERGED;
+        */
+    }
+
+    //AAAAAAAAAAAAAAAAAAAAAA
+    std::string s(ui.output.utf8().get_data());
+    godot::String delimiter = " - ";
+    std::string filePath = s.substr(0, ui.output.find(delimiter));
+    std::string status = s.substr(ui.output.find(delimiter) + 1, ui.output.length());
+    
+    char buff[1000];
+    snprintf(buff, 1000, "Output: %s", s.c_str());
+    godot::UtilityFunctions::print(buff);
+
+    char bugg[1000];
+    snprintf(bugg, 1000, "File Path: %s", filePath.c_str());
+    godot::UtilityFunctions::print(String(bugg));
+
+    char bugg2[1000];
+    snprintf(bugg2, 1000, "File Status: %s", status.c_str());
+    godot::UtilityFunctions::print(String(bugg2));
+    
+    if(status.find("add"))  
+            fileStatus = CHANGE_TYPE_NEW;
+    
+    if(status.find("empty"))  
+            fileStatus = CHANGE_TYPE_NEW;
+
+   
+    _run_p4_command("where", filePath.c_str());
+    
+    std::string s2((ui.output.utf8().get_data()));
+
+    if(ui.output.contains(":"))
+    {
+        
+       std::string globalPath = s2.substr(ui.output.find(":") -1);
+       godot::UtilityFunctions::print(globalPath.c_str());
+       modified_files.push_back(create_status_file(ProjectSettings::get_singleton()->globalize_path(String(globalPath.c_str())), fileStatus, TREE_AREA_UNSTAGED));  
+    }
+    else
+        godot::UtilityFunctions::print("no good boss");
+        
+    
+    
+    
+
     
     return modified_files;
 }
@@ -279,10 +351,10 @@ bool godot::P4Plugin::_run_p4_command(const char* cmd, const char* arg)
     client.SetArgv(1, bs);  
     client.Run(cmd, &ui);
 
-    char data;
-    ui.OutputInfo('0', &data);
-    ui.OutputError(&data);
-    ui.OutputText(&data, 1000);  
+    //char data;
+    //ui.OutputInfo('0', &data);
+    //ui.OutputError(&data);
+    //ui.OutputText(&data, 1000);  
    
     return true;
 }
@@ -291,10 +363,10 @@ bool godot::P4Plugin::_run_p4_command(const char* cmd)
 {
     client.Run(cmd, &ui);
 
-    char data;
-    ui.OutputInfo('0', &data);
-    ui.OutputError(&data);
-    ui.OutputText(&data, 1000);  
+    //char data;
+    //ui.OutputInfo('0', &data);
+    //ui.OutputError(&data);
+    //ui.OutputText(&data, 1000);  
    
     return true;
 }
@@ -322,37 +394,6 @@ void godot::P4Plugin::_traverse_file_tree(godot::String path, int depth)
             
             std::string filePath = ProjectSettings::get_singleton()->globalize_path(newpath + files[j]).utf8();            
             _run_p4_command("status", filePath.c_str());
-
-            ChangeType fileStatus;
-            if(ui.output.length() > 0)
-            {
-                //A new file has been added.
-                if(ui.output.contains("reconcile to add"))  
-                    fileStatus = CHANGE_TYPE_NEW;
-                /*
-                //An earlier added file has been modified.
-                if(ui.output.contains("DELETE ME"))  
-                    fileStatus = CHANGE_TYPE_MODIFIED;
-                
-                //An earlier added file has been renamed.
-                if(ui.output.contains("DELETE ME"))         
-                    fileStatus = CHANGE_TYPE_RENAMED;
-
-                //An earlier added file has been deleted.
-                if(ui.output.contains("DELETE ME"))         
-                    fileStatus = CHANGE_TYPE_DELETED;
-                
-                //An earlier added file has been typechanged.
-                if(ui.output.contains("DELETE ME"))         
-                    fileStatus = CHANGE_TYPE_TYPECHANGE;
-                
-                //A file is left unmerged.
-                if(ui.output.contains("DELETE ME"))         
-                    fileStatus = CHANGE_TYPE_UNMERGED;
-                */
-            }
-
-            modified_files.push_back(create_status_file(ProjectSettings::get_singleton()->globalize_path(newpath + files[j]), fileStatus, TREE_AREA_UNSTAGED));  
 
             //P4Plugin::RunP4Command("status", bs);
         }

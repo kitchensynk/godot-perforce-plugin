@@ -27,6 +27,8 @@ class P4ClientUser : public ClientUser
     public:
 		Credentials creds;
 		godot::String output;
+		godot::String outputError;
+		godot::String outputText;
 		bool debug_mode = false;
 
         virtual void OutputInfo( char level, const char * data ) override;
