@@ -11,38 +11,35 @@
 //Client User Class Functions
 void P4ClientUser::OutputInfo( char level, const char * data )
 {
-    godot::UtilityFunctions::print("Outputing Info...");
+    if(IsValidASCII(data))
+    {
+        if(debug_mode) 
+            godot::UtilityFunctions::print(data);
+
+        output = godot::String(data);
+        outputBuffer.push_back(output);
+    }
+}
+
+void P4ClientUser::OutputError( const char * data )
+{
+   if(IsValidASCII(data))
+    {
+        if(debug_mode) 
+            godot::UtilityFunctions::push_error(data);
+
+        output = data;
+    }
+}
+
+void P4ClientUser::OutputText( const char * data, int length )
+{
     if(IsValidASCII(data))
     {
         if(debug_mode) 
             godot::UtilityFunctions::print(data);
 
         output = data;
-    }
-}
-
-void P4ClientUser::OutputError( const char * data )
-{
-   godot::UtilityFunctions::print("Outputing Error...");
-
-   if(IsValidASCII(data))
-    {
-        if(debug_mode) 
-            godot::UtilityFunctions::push_error(data);
-
-        outputError = data;
-    }
-}
-
-void P4ClientUser::OutputText( const char * data, int length )
-{
-    godot::UtilityFunctions::print("Outputting Text...");
-    if(IsValidASCII(data))
-    {
-        if(debug_mode) 
-            godot::UtilityFunctions::print(data);
-
-        outputText = data;
     }
 }
 
@@ -217,85 +214,74 @@ void godot::P4Plugin::_set_credentials(const godot::String &username, const godo
 //TODO: Better file management for changelist
 godot::TypedArray<godot::Dictionary> godot::P4Plugin::_get_modified_files_data()
 {   
+    //Don't handle files if no P4 connection
+    if(!logged_in)
+        return modified_files;
+
     //Clear Array
-    modified_files.clear();
+    //modified_files.clear();
  
     //TODO: determine modified files for change list in godot
     //TraverseFileTree("res://");
     
     //Add changed files to P4 change list
+    ui.outputBuffer.clear();
+    godot::UtilityFunctions::print("reconcile:");
     _run_p4_command("reconcile");
-
-    ChangeType fileStatus;
-    if(ui.output.length() > 0)
+    
+    godot::List<godot::String> lines = ui.outputBuffer;
+    
+    for(godot::String line : lines)
     {
-        /*
-        //A new file has been added.
-        if(ui.output.contains("reconcile to add"))  
-            fileStatus = CHANGE_TYPE_NEW;
-        
-        //An earlier added file has been modified.
-        if(ui.output.contains("DELETE ME"))  
-            fileStatus = CHANGE_TYPE_MODIFIED;
-        
-        //An earlier added file has been renamed.
-        if(ui.output.contains("DELETE ME"))         
-            fileStatus = CHANGE_TYPE_RENAMED;
-
-        //An earlier added file has been deleted.
-        if(ui.output.contains("DELETE ME"))         
-            fileStatus = CHANGE_TYPE_DELETED;
-        
-        //An earlier added file has been typechanged.
-        if(ui.output.contains("DELETE ME"))         
-            fileStatus = CHANGE_TYPE_TYPECHANGE;
-        
-        //A file is left unmerged.
-        if(ui.output.contains("DELETE ME"))         
-            fileStatus = CHANGE_TYPE_UNMERGED;
-        */
+        godot::UtilityFunctions::print(line);
     }
 
-    //AAAAAAAAAAAAAAAAAAAAAA
-    std::string s(ui.output.utf8().get_data());
-    godot::String delimiter = " - ";
-    std::string filePath = s.substr(0, ui.output.find(delimiter));
-    std::string status = s.substr(ui.output.find(delimiter) + 1, ui.output.length());
-    
-    char buff[1000];
-    snprintf(buff, 1000, "Output: %s", s.c_str());
-    godot::UtilityFunctions::print(buff);
+    godot::UtilityFunctions::print("/end of files");
 
-    char bugg[1000];
-    snprintf(bugg, 1000, "File Path: %s", filePath.c_str());
-    godot::UtilityFunctions::print(String(bugg));
+    godot::UtilityFunctions::print("Parsing files:");
+    for(godot::String line : lines)
+    {    
+        std::string s(line.utf8());
+        godot::String delimiter = " - ";
+        std::string filePath = s.substr(0, line.find(delimiter));
+        std::string status = s.substr(line.find(delimiter) + 1, line.length());
+        
+        char buff[1000];
+        snprintf(buff, 1000, "Output: %s", s.c_str());
+        godot::UtilityFunctions::print(buff);
 
-    char bugg2[1000];
-    snprintf(bugg2, 1000, "File Status: %s", status.c_str());
-    godot::UtilityFunctions::print(String(bugg2));
-    
-    if(status.find("add"))  
+        char bugg[1000];
+        snprintf(bugg, 1000, "File Path: %s", filePath.c_str());
+        godot::UtilityFunctions::print(String(bugg));
+
+        char bugg2[1000];
+        snprintf(bugg2, 1000, "File Status: %s", status.c_str());
+        godot::UtilityFunctions::print(String(bugg2));
+        
+        ChangeType fileStatus;
+        if(status.find("add"))  
             fileStatus = CHANGE_TYPE_NEW;
-    
-    if(status.find("empty"))  
-            fileStatus = CHANGE_TYPE_NEW;
+        
+        //Get File Path in Global context
+        godot::UtilityFunctions::print("Getting global path for file...");
+        _run_p4_command("where", filePath.c_str());
+        std::string s2((ui.output.utf8().get_data()));
+        if(ui.output.contains(":"))
+        {   
+            std::string globalPath = s2.substr(ui.output.find(":") -1);
+            godot::UtilityFunctions::print(globalPath.c_str());
+            modified_files.push_back(create_status_file(ProjectSettings::get_singleton()->globalize_path(String(globalPath.c_str())), fileStatus, TREE_AREA_UNSTAGED));  
+        }
+        else
+            godot::UtilityFunctions::print("no good boss");
+    }
+
+    //IMPORTANT
+    ui.outputBuffer.clear();
 
    
-    _run_p4_command("where", filePath.c_str());
-    
-    std::string s2((ui.output.utf8().get_data()));
-
-    if(ui.output.contains(":"))
-    {
         
-       std::string globalPath = s2.substr(ui.output.find(":") -1);
-       godot::UtilityFunctions::print(globalPath.c_str());
-       modified_files.push_back(create_status_file(ProjectSettings::get_singleton()->globalize_path(String(globalPath.c_str())), fileStatus, TREE_AREA_UNSTAGED));  
-    }
-    else
-        godot::UtilityFunctions::print("no good boss");
-        
-    
+            
     
     
 
