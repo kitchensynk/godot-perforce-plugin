@@ -182,9 +182,9 @@ void godot::P4Plugin::_connect()
         godot::UtilityFunctions::print("----    CONNECTED    ----\n");
         godot::UtilityFunctions::print("-------------------------\n");
 
-        //Cleanup
-        //_run_p4_command("logout");
-        //logged_in = false;
+        
+        //Update Changelist if login
+        _get_modified_files_data();
     }
     else
     {
@@ -219,26 +219,14 @@ godot::TypedArray<godot::Dictionary> godot::P4Plugin::_get_modified_files_data()
         return modified_files;
 
     //Clear Array
-    //modified_files.clear();
- 
-    //TODO: determine modified files for change list in godot
-    //TraverseFileTree("res://");
+    godot::TypedArray<godot::Dictionary> prevChangelist = modified_files;
     
     //Add changed files to P4 change list
     ui.outputBuffer.clear();
-    godot::UtilityFunctions::print("reconcile:");
     _run_p4_command("reconcile");
     
     godot::List<godot::String> lines = ui.outputBuffer;
     
-    for(godot::String line : lines)
-    {
-        godot::UtilityFunctions::print(line);
-    }
-
-    godot::UtilityFunctions::print("/end of files");
-
-    godot::UtilityFunctions::print("Parsing files:");
     for(godot::String line : lines)
     {    
         std::string s(line.utf8());
@@ -246,6 +234,7 @@ godot::TypedArray<godot::Dictionary> godot::P4Plugin::_get_modified_files_data()
         std::string filePath = s.substr(0, line.find(delimiter));
         std::string status = s.substr(line.find(delimiter) + 1, line.length());
         
+        /*
         char buff[1000];
         snprintf(buff, 1000, "Output: %s", s.c_str());
         godot::UtilityFunctions::print(buff);
@@ -257,6 +246,7 @@ godot::TypedArray<godot::Dictionary> godot::P4Plugin::_get_modified_files_data()
         char bugg2[1000];
         snprintf(bugg2, 1000, "File Status: %s", status.c_str());
         godot::UtilityFunctions::print(String(bugg2));
+        */
         
         ChangeType fileStatus;
         if(status.find("add"))  
@@ -270,7 +260,20 @@ godot::TypedArray<godot::Dictionary> godot::P4Plugin::_get_modified_files_data()
         {   
             std::string globalPath = s2.substr(ui.output.find(":") -1);
             godot::UtilityFunctions::print(globalPath.c_str());
-            modified_files.push_back(create_status_file(ProjectSettings::get_singleton()->globalize_path(String(globalPath.c_str())), fileStatus, TREE_AREA_UNSTAGED));  
+            
+            bool found = false;
+            for(int i = 0; i < prevChangelist.size(); i++)
+            {
+                godot::Dictionary entry = prevChangelist[i];
+                if(entry.find_key(globalPath.c_str() != NULL))
+                {
+                    found = true;
+                    modified_files[i] = create_status_file(ProjectSettings::get_singleton()->globalize_path(String(globalPath.c_str())), fileStatus, TREE_AREA_UNSTAGED);
+                }
+            }
+            
+            if(!found)
+                modified_files.push_back(create_status_file(ProjectSettings::get_singleton()->globalize_path(String(globalPath.c_str())), fileStatus, TREE_AREA_UNSTAGED));  
         }
         else
             godot::UtilityFunctions::print("no good boss");
