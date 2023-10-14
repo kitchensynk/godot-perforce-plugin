@@ -68,6 +68,7 @@ namespace godot
 			ClientApi client;
 			StrBuf msg;
 			
+			bool connected = false;
 			bool logged_in = false;
 
 			//Constructor/Deconstructor

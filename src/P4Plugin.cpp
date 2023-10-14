@@ -127,6 +127,7 @@ bool godot::P4Plugin::_shut_down()
 void godot::P4Plugin::_connect()
 {
     //Initalize P4
+    
     P4Libraries::Initialize(P4LIBRARIES_INIT_ALL, &e);
     if (e.Test())
     {
@@ -144,13 +145,16 @@ void godot::P4Plugin::_connect()
 
     godot::UtilityFunctions::print("\nCurrent VCS Credentials:");
     godot::UtilityFunctions::print("User: " + creds.username + "\n" +
-                                   "Server Address: " + creds.ssh_public_key_path + "\n" +
-                                   "Workspace: " + creds.ssh_private_key_path);
+                                "Server Address: " + creds.ssh_public_key_path + "\n" +
+                                "Workspace: " + creds.ssh_private_key_path);
 
     godot::UtilityFunctions::print("\nAttempting to Establish Connection to P4 Server: " + creds.ssh_public_key_path + "...");
     
     //Init Connection
-    client.Init(&e);
+    if(!connected){
+        client.Init(&e);
+    }
+    
 
     //Connection Success:
     if (e.Test())
@@ -158,6 +162,9 @@ void godot::P4Plugin::_connect()
         e.Fmt(&msg);
         popup_error("Connection Error:\n" + godot::String(msg.Text()));
         e.Clear();
+        
+    }else{
+        connected = true;
     }
 
     //Debug Mode = Print statements in godot
