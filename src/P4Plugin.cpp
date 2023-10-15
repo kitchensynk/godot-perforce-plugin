@@ -39,7 +39,7 @@ void P4ClientUser::OutputText( const char * data, int length )
         if(debug_mode) 
             godot::UtilityFunctions::print(data);
 
-        output = data;
+        output = godot::String(data);
     }
 }
 
@@ -221,9 +221,13 @@ void godot::P4Plugin::_set_credentials(const godot::String &username, const godo
 //TODO: Better file management for changelist
 godot::TypedArray<godot::Dictionary> godot::P4Plugin::_get_modified_files_data()
 {   
+    godot::TypedArray<godot::Dictionary> new_modified_files;
+
     //Don't handle files if no P4 connection
-    if(!logged_in)
-        return modified_files;
+    if(!logged_in){
+        return new_modified_files;
+    }
+        
 
     //Clear Array
     godot::TypedArray<godot::Dictionary> prevChangelist = modified_files;
@@ -231,72 +235,85 @@ godot::TypedArray<godot::Dictionary> godot::P4Plugin::_get_modified_files_data()
     //Add changed files to P4 change list
     ui.outputBuffer.clear();
     _run_p4_command("reconcile");
-    
-    godot::List<godot::String> lines = ui.outputBuffer;
-    
-    for(godot::String line : lines)
-    {    
-        std::string s(line.utf8());
-        godot::String delimiter = " - ";
-        std::string filePath = s.substr(0, line.find(delimiter));
-        std::string status = s.substr(line.find(delimiter) + 1, line.length());
-        
-        /*
-        char buff[1000];
-        snprintf(buff, 1000, "Output: %s", s.c_str());
-        godot::UtilityFunctions::print(buff);
 
-        char bugg[1000];
-        snprintf(bugg, 1000, "File Path: %s", filePath.c_str());
-        godot::UtilityFunctions::print(String(bugg));
+    _run_p4_command("changelist", "-o");
 
-        char bugg2[1000];
-        snprintf(bugg2, 1000, "File Status: %s", status.c_str());
-        godot::UtilityFunctions::print(String(bugg2));
-        */
-        
-        ChangeType fileStatus;
-        if(status.find("add"))  
-            fileStatus = CHANGE_TYPE_NEW;
-        
-        //Get File Path in Global context
-        godot::UtilityFunctions::print("Getting global path for file...");
-        _run_p4_command("where", filePath.c_str());
-        std::string s2((ui.output.utf8().get_data()));
-        if(ui.output.contains(":"))
-        {   
-            std::string globalPath = s2.substr(ui.output.find(":") -1);
-            godot::UtilityFunctions::print(globalPath.c_str());
-            
-            bool found = false;
-            for(int i = 0; i < prevChangelist.size(); i++)
-            {
-                godot::Dictionary entry = prevChangelist[i];
-                if(entry.find_key(globalPath.c_str() != NULL))
-                {
-                    found = true;
-                    modified_files[i] = create_status_file(ProjectSettings::get_singleton()->globalize_path(String(globalPath.c_str())), fileStatus, TREE_AREA_UNSTAGED);
-                }
+    char* token = strtok(const_cast<char*>(ui.output.utf8().get_data()), "\n");
+
+    bool passed = false;
+
+    while (token != NULL) {
+        printf(" % s\n", token);
+
+        godot::String line = godot::String(token);
+
+        if(passed){
+
+            //godot::UtilityFunctions::print("CHANGELIST FILE LINE:");
+
+            ChangeType fileStatus;
+
+            std::string s(line.utf8());
+            godot::String delimiter = "#";
+            std::string filePath = s.substr(0, line.find(delimiter));
+            std::string status = s.substr(line.find(delimiter) + 1, line.length());
+
+            //CLEAR WHITESPACE
+            filePath = filePath.erase(0, filePath.find_first_not_of(" \r\n\t\v\f"));
+            status = status.erase(0, status.find_first_not_of(" \r\n\t\v\f"));
+
+            filePath = filePath.erase(filePath.find_last_not_of(" \r\n\t\v\f") + 1);
+            status.erase(status.find_last_not_of(" \r\n\t\v\f") + 1);
+
+            //godot::UtilityFunctions::print(filePath.c_str());
+            //godot::UtilityFunctions::print(status.c_str());
+
+            if(status.find("add") != std::string::npos) {
+                fileStatus = CHANGE_TYPE_NEW;
+            } 
+            if(status.find("edit") != std::string::npos) {
+                fileStatus = CHANGE_TYPE_MODIFIED;
             }
+            if(status.find("delete") != std::string::npos) {
+                fileStatus = CHANGE_TYPE_DELETED;
+            } 
             
-            if(!found)
-                modified_files.push_back(create_status_file(ProjectSettings::get_singleton()->globalize_path(String(globalPath.c_str())), fileStatus, TREE_AREA_UNSTAGED));  
+            //godot::UtilityFunctions::print("Getting global path for file...");
+            _run_p4_command("where", filePath.c_str());
+            std::string s2((ui.output.utf8().get_data()));
+            if(ui.output.contains(":"))
+            {   
+                std::string globalPath = s2.substr(ui.output.find(":") -1);
+                //godot::UtilityFunctions::print(globalPath.c_str());
+                
+                bool found = false;
+                for(int i = 0; i < prevChangelist.size(); i++)
+                {
+                    godot::Dictionary entry = prevChangelist[i];
+                    if(entry.find_key(globalPath.c_str() != NULL))
+                    {
+                        found = true;
+                        new_modified_files[i] = create_status_file(ProjectSettings::get_singleton()->globalize_path(String(globalPath.c_str())), fileStatus, TREE_AREA_UNSTAGED);
+                    }
+                }
+                
+                if(!found)
+                    new_modified_files.push_back(create_status_file(ProjectSettings::get_singleton()->globalize_path(String(globalPath.c_str())), fileStatus, TREE_AREA_UNSTAGED));  
+            }
+            else
+                godot::UtilityFunctions::print("no good boss");
         }
-        else
-            godot::UtilityFunctions::print("no good boss");
+
+        if(line.contains("Files:") && !line.contains(" Files:")){ 
+            passed = true;
+        }
+        token = strtok(NULL, "\n");
     }
 
     //IMPORTANT
     ui.outputBuffer.clear();
 
-   
-        
-            
-    
-    
-
-    
-    return modified_files;
+    return new_modified_files;
 }
 
 godot::String godot::P4Plugin::_get_vcs_name() 
