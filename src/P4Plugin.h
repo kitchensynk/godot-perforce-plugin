@@ -27,6 +27,8 @@ class P4ClientUser : public ClientUser
     public:
 		Credentials creds;
 		godot::String output;
+		godot::List<godot::String> outputBuffer;
+		
 		bool debug_mode = false;
 
         virtual void OutputInfo( char level, const char * data ) override;
@@ -46,7 +48,7 @@ namespace godot
 		public:
 			godot::Callable callable;
 			godot::String Init();
-			
+			godot::String Refresh();
 	};
 
 	class P4Plugin : public EditorVCSInterface 
@@ -66,6 +68,7 @@ namespace godot
 			ClientApi client;
 			StrBuf msg;
 			
+			bool connected = false;
 			bool logged_in = false;
 
 			//Constructor/Deconstructor
