@@ -84,6 +84,12 @@ godot::String godot::P4FileHandler::Init()
     get_editor_interface()->get_resource_filesystem()->connect("filesystem_changed",callable);
     return "";
 } 
+
+godot::String godot::P4FileHandler::Refresh()
+{
+    get_editor_interface()->get_resource_filesystem()->emit_signal("filesystem_changed");
+    return "";
+} 
 #pragma endregion
 
 //Member Variables
@@ -191,7 +197,7 @@ void godot::P4Plugin::_connect()
 
         
         //Update Changelist if login
-        _get_modified_files_data();
+        ps->Refresh();
     }
     else
     {
@@ -221,17 +227,14 @@ void godot::P4Plugin::_set_credentials(const godot::String &username, const godo
 //TODO: Better file management for changelist
 godot::TypedArray<godot::Dictionary> godot::P4Plugin::_get_modified_files_data()
 {   
-    godot::TypedArray<godot::Dictionary> new_modified_files;
 
     //Don't handle files if no P4 connection
     if(!logged_in){
-        return new_modified_files;
+        return modified_files;
     }
-        
 
-    //Clear Array
-    godot::TypedArray<godot::Dictionary> prevChangelist = modified_files;
-    
+    godot::TypedArray<godot::Dictionary> new_modified_files;
+        
     //Add changed files to P4 change list
     ui.outputBuffer.clear();
     _run_p4_command("reconcile");
@@ -285,20 +288,8 @@ godot::TypedArray<godot::Dictionary> godot::P4Plugin::_get_modified_files_data()
             {   
                 std::string globalPath = s2.substr(ui.output.find(":") -1);
                 //godot::UtilityFunctions::print(globalPath.c_str());
-                
-                bool found = false;
-                for(int i = 0; i < prevChangelist.size(); i++)
-                {
-                    godot::Dictionary entry = prevChangelist[i];
-                    if(entry.find_key(globalPath.c_str() != NULL))
-                    {
-                        found = true;
-                        new_modified_files[i] = create_status_file(ProjectSettings::get_singleton()->globalize_path(String(globalPath.c_str())), fileStatus, TREE_AREA_UNSTAGED);
-                    }
-                }
-                
-                if(!found)
-                    new_modified_files.push_back(create_status_file(ProjectSettings::get_singleton()->globalize_path(String(globalPath.c_str())), fileStatus, TREE_AREA_UNSTAGED));  
+
+                new_modified_files.push_back(create_status_file(ProjectSettings::get_singleton()->globalize_path(String(globalPath.c_str())), fileStatus, TREE_AREA_UNSTAGED));  
             }
             else
                 godot::UtilityFunctions::print("no good boss");
@@ -354,7 +345,8 @@ void godot::P4Plugin::_push(const String &remote, bool force)
 void godot::P4Plugin::_p4_file_change()
 {
     godot::UtilityFunctions::print("File Changed");
-    _get_modified_files_data();
+
+    //_get_modified_files_data();
 }
 
 //Testing Methods

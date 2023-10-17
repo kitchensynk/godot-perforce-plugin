@@ -48,7 +48,7 @@ namespace godot
 		public:
 			godot::Callable callable;
 			godot::String Init();
-			
+			godot::String Refresh();
 	};
 
 	class P4Plugin : public EditorVCSInterface 
