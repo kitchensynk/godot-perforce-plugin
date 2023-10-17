@@ -9,10 +9,10 @@ Adds support for Helix Core P4 in Godot 4.1.1
 - Connects to Perforce Server
 - Updates Changelist when Godot Filesystem changes
 - Implements Godot Push/Pull/Fetch as P4 Submit/Sync
+- Populates EditorVCSInterface Staged Changes Window with modified files
 
 ## Planned Features
 
-- Populate EditorVCSInterface Staged Changes Window with modified files
 - Icons for P4 File Status
 - Modify Godot to support EditorVCSInterface modifications per plugin (ie Login Window)
 - Support for Diff / Inline Diff
