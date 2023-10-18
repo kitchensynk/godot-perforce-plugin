@@ -12,6 +12,8 @@
 #include "godot_cpp/classes/dir_access.hpp"
 #include "godot_cpp/classes/project_settings.hpp"
 
+#include <map>
+
 
 
 struct Credentials {
@@ -27,6 +29,7 @@ class P4ClientUser : public ClientUser
     public:
 		Credentials creds;
 		godot::String output;
+		std::map<std::string, std::string> output_stat;
 		godot::List<godot::String> outputBuffer;
 		
 		bool debug_mode = false;
@@ -34,6 +37,7 @@ class P4ClientUser : public ClientUser
         virtual void OutputInfo( char level, const char * data ) override;
 		virtual void OutputText( const char * data, int length) override;
 		virtual void OutputError( const char * data ) override;
+		virtual void OutputStat( StrDict *varList ) override;
 		virtual void Prompt(const StrPtr &msg, StrBuf &buf, int noEcho, Error *e) override;	
 		bool IsValidASCII(const char * data);
 };
@@ -85,10 +89,13 @@ namespace godot
 			godot::String _get_vcs_name() override;
 			godot::TypedArray<godot::Dictionary> _get_modified_files_data() override;
 
+			godot::TypedArray<godot::Dictionary> _get_diff(const godot::String &identifier, int32_t area) override;
+
 			void _pull(const String &remote) override;
 			void _push(const String &remote, bool force) override;
 			void _fetch(const String &remote) override;
 			void _commit(const String &msg) override;
+			
 			const String defaultCommit = "Submitted by Godot <[o_o]>";
 			String commitMessage = "";
 			#pragma endregion

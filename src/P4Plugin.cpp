@@ -7,6 +7,8 @@
 #include <godot_cpp/core/class_db.hpp>
 
 
+
+
 #pragma region P4ClientUser
 //Client User Class Functions
 void P4ClientUser::OutputInfo( char level, const char * data )
@@ -40,6 +42,17 @@ void P4ClientUser::OutputText( const char * data, int length )
             godot::UtilityFunctions::print(data);
 
         output = godot::String(data);
+    }
+}
+
+void P4ClientUser::OutputStat( StrDict *varList )
+{   
+    StrRef var, val;
+
+    for( int i = 0; varList->GetVar(i, var, val); i++ ) {
+	if( var == "specdef" || var == "func" || var == "specFormatted" )
+	    continue;
+    output_stat.insert(std::pair<std::string, std::string>(std::string(var.Text()),std::string(val.Text())));
     }
 }
 
@@ -325,6 +338,35 @@ void godot::P4Plugin::_fetch(const String &remote)
 void godot::P4Plugin::_commit(const String &msg)
 {
     commitMessage = msg;
+}
+
+godot::TypedArray<godot::Dictionary> godot::P4Plugin::_get_diff(const godot::String &identifier, int32_t area)
+{
+
+    godot::TypedArray<godot::Dictionary> new_diff;
+
+    char buff[1000];
+    snprintf(buff, 1000, "Identifier: %s, Area: %d", identifier.utf8().get_data(),area);
+    godot::UtilityFunctions::print(buff);
+
+
+    _run_p4_command("fstat", identifier.utf8().get_data());
+
+    auto pos = ui.output_stat.find("headRev");
+    if (pos == ui.output_stat.end()) {
+        godot::UtilityFunctions::push_error("FSTAT ERROR");
+    } else {
+        std::string value = pos->second;
+        char bugg[1000];
+        snprintf(bugg, 1000, "Identifier: %s, Head Rev: %s", identifier.utf8().get_data(),value);
+        godot::UtilityFunctions::print(bugg);
+        
+    }
+
+    new_diff.push_back(create_diff_file(identifier, identifier));
+
+
+    return new_diff;
 }
 
 //TODO: Add force push
